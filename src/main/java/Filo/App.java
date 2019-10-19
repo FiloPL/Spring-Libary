@@ -1,6 +1,6 @@
 package Filo;
 
-import Filo.model.Book;
+import Filo.service.Menu;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 

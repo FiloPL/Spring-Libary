@@ -7,12 +7,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Repository
-public class BookRepository extends Book {
+public class BookRepository {
     private Set<Book> books = initialize();
-
-    public BookRepository(int id, String author, String title) {
-        super(id, author, title);
-    }
 
     private Set<Book> initialize() {
         return new HashSet<>(Arrays.asList(new Book(1, "Testy", "Kaczanowski"),
@@ -27,26 +23,64 @@ public class BookRepository extends Book {
                 new Book(10, "Testy", "Kaczanowski")));
     }
 
-
-    //metoda do dodania ksiazki do seta
-    public BookRepository addBook(Book book) {
-        book.setId();//ustawiamy dodawanej ksiazce nastepne wolne id
-        books.add(book);//dodajemy do seta
-        return book; //zwracamy ksiazke z ustawionym id
+    public Optional<Book> borrowBook(String title, LocalDate borrowedTill) {
+//        for (Book book : books) {alternatywa
+//            if (title.equals(book.getTitle())){
+//                if (book.getBorrowedTill() == null) {
+//                    book.setBorrowedTill(borrowedTill);
+//                    return Optional.of(book);
+//                }
+//            }
+//        }
+        Optional<Book> any = books.stream()
+                .filter(book -> title.equals(book.getTitle()))
+                .filter(book -> book.getBorrowedTill() == null).findAny();
+        any.ifPresent(book -> book.setBorrowedTill(borrowedTill));
+        return any;
     }
 
-    public Set<Book> getBooks(String title) {
-        return null;
+    public void returnBook(int bookId) {
+//        for (Book book : books) {alternatywa
+//            if (book.getId() == bookId) {
+//                book.setBorrowedTill(null);
+//            }
+//        }
+//        throw new RuntimeException("Book not found");
+        books.stream()
+                .filter(book -> book.getId() == bookId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Book not found"))
+                .setBorrowedTill(null);
     }
 
-    public BookRepository rentBook(int id) {
-        return null;
+    public Book addBook(Book bookToAdd) {
+        bookToAdd.setId(generateNextId());
+        books.add(bookToAdd);
+        return bookToAdd;
     }
-   public BookRepository borrowedBook(String title, LocalDate date) {
-        return null;
-   }
-
 
     public void removeBook(int id) {
+        Book bookToRemove = books.stream()
+                .filter(book -> id == book.getId())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        books.remove(bookToRemove);
+    }
+
+    public Set<Book> getBooks() {
+        return books;
+    }
+
+    private int generateNextId() {
+//        int max = 0;
+//        for(Book book : books) {
+//            if (book.getId() > max) {
+//                max = book.getId();
+//            }
+//        }
+//        return max + 1;
+        return books.stream()
+                .mapToInt(Book::getId)
+                .max().getAsInt() + 1;
     }
 }
